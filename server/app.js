@@ -1,11 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const authRoutes = require('./routes/auth.routes');
-const devRoutes = require('./routes/developer.routes');
-const companyRoutes = require('./routes/company.routes');
+const authRoutes = require('./routes/auth.routes.js');
+const devRoutes = require('./routes/developer.routes.js');
+const companyRoutes = require('./routes/company.routes.js');
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
