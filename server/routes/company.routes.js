@@ -1,9 +1,13 @@
-const router = require('express').Router();
-const auth = require('../middleware/auth.middleware');
-const role = require('../middleware/role.middleware');
-const ctrl = require('../controllers/company.controller');
+const express = require("express");
+const router = express.Router();
+const {
+  getCompanyProfile,
+  upsertCompanyProfile,
+} = require("../controllers/company.controller");
 
-router.post('/profile', auth, role('company'), ctrl.createProfile);
-router.get('/profile', auth, role('company'), ctrl.getProfile);
+const auth = require("../middleware/auth.middleware");
+
+router.get("/profile", auth, getCompanyProfile);
+router.post("/profile", auth, upsertCompanyProfile);
 
 module.exports = router;

@@ -1,9 +1,10 @@
-const app = require('./app');
-const sequelize = require('./config/db');
-
+require('dotenv').config(); 
+const app = require('./app'); 
+const sequelize = require('./config/db'); 
 const PORT = 5000;
+const db = require("./models")
 
-sequelize.sync() // 👈 THIS CREATES TABLES
+sequelize.sync({ alter: true })
   .then(() => {
     
     app.listen(PORT, () => {

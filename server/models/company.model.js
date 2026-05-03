@@ -1,12 +1,33 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
-const User = require('./user.model');
+const { Model } = require("sequelize");
 
-const Company = sequelize.define('Company', {
-  company_name: DataTypes.STRING,
-  description: DataTypes.TEXT,
-});
+module.exports = (sequelize, DataTypes) => {
+  class Company extends Model {}
 
-Company.belongsTo(User, { foreignKey: 'user_id' });
+  Company.init(
+    {
+      companyName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: DataTypes.TEXT,
+      website: DataTypes.STRING,
+      location: DataTypes.STRING,
+      industry: DataTypes.STRING,
+      companySize: DataTypes.STRING,
+      foundedYear: DataTypes.INTEGER,
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+    },
+    {
+      sequelize,
+      modelName: "Company",
+      tableName: "Companies",
+    }
+  );
 
-module.exports = Company;
+  console.log("✅ Company model registered");
+
+  return Company;
+};

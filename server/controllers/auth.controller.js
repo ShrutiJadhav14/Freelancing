@@ -21,7 +21,22 @@ exports.register = async (req, res) => {
       role,
     });
 
-    res.json({ msg: "User registered successfully" });
+    // ✅ CREATE TOKEN (same as login)
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // ✅ RETURN TOKEN + USER
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+      },
+    });
 
   } catch (err) {
     res.status(500).json({ msg: "Server error" });

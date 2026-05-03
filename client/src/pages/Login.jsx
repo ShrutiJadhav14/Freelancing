@@ -2,6 +2,7 @@ import { useState } from "react";
 import API from "../services/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function Login() {
   const nav = useNavigate();
@@ -15,11 +16,9 @@ export default function Login() {
 
     if (!form.email) err.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(form.email))
-      err.email = "Invalid email format";
+      err.email = "Invalid email";
 
     if (!form.password) err.password = "Password required";
-    else if (!/^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(form.password))
-      err.password = "8-12 chars, letters + numbers";
 
     setErrors(err);
     return Object.keys(err).length === 0;
@@ -27,7 +26,6 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     try {
@@ -37,7 +35,7 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       toast.success("Welcome back 🚀");
-      nav("/dashboard");
+      nav(res.data.user.role === "company" ? "/company" : "/developer");
 
     } catch (err) {
       toast.error(err.response?.data?.msg || "Login failed");
@@ -45,63 +43,78 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      
-      {/* LEFT PANEL */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex-col justify-center items-center p-10">
-        <h1 className="text-4xl font-bold mb-4">DevConnect</h1>
-        <p className="text-lg opacity-80 text-center">
-          Connect with top developers and build your next big idea.
+    <div className="min-h-screen flex bg-gradient-to-br from-black via-gray-900 to-black">
+
+      {/* LEFT */}
+      <div className="hidden md:flex w-1/2 flex-col justify-center items-center text-white px-10">
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl font-bold mb-4"
+        >
+          DevConnect
+        </motion.h1>
+
+        <p className="text-gray-400 text-center max-w-sm">
+          Build, connect and hire top developers with zero friction.
         </p>
       </div>
 
-      {/* RIGHT PANEL */}
-      <div className="flex w-full md:w-1/2 justify-center items-center bg-gray-100">
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-2xl w-96">
-          
-          <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+      {/* RIGHT */}
+      <div className="flex w-full md:w-1/2 justify-center items-center">
+        <motion.form
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleSubmit}
+          className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-xl w-96"
+        >
+          <h2 className="text-3xl font-bold text-white text-center mb-6">
+            Login
+          </h2>
 
           {/* EMAIL */}
           <input
             type="email"
             placeholder="Email"
-            className={`w-full p-3 border rounded-lg mb-1 ${errors.email && "border-red-500"}`}
+            className="w-full p-3 mb-2 bg-white/10 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
-          <p className="text-red-500 text-sm mb-3">{errors.email}</p>
+          <p className="text-red-400 text-sm mb-3">{errors.email}</p>
 
           {/* PASSWORD */}
           <div className="relative">
             <input
               type={showPass ? "text" : "password"}
               placeholder="Password"
-              className={`w-full p-3 border rounded-lg mb-1 ${errors.password && "border-red-500"}`}
+              className="w-full p-3 mb-2 bg-white/10 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
             <span
-              className="absolute right-3 top-3 cursor-pointer text-sm"
               onClick={() => setShowPass(!showPass)}
+              className="absolute right-3 top-3 text-gray-300 cursor-pointer"
             >
-              {showPass ? "Hide" : "Show"}
+              {showPass ? "🙈" : "👁️"}
             </span>
           </div>
-          <p className="text-red-500 text-sm mb-3">{errors.password}</p>
+          <p className="text-red-400 text-sm mb-3">{errors.password}</p>
 
-          <button className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition"
+          >
             Login
-          </button>
+          </motion.button>
 
-          <p className="text-sm mt-4 text-center">
+          <p className="text-gray-400 text-sm mt-4 text-center">
             Don’t have an account?
             <span
               onClick={() => nav("/register")}
-              className="text-indigo-600 cursor-pointer ml-1"
+              className="text-indigo-400 ml-1 cursor-pointer"
             >
               Register
             </span>
           </p>
-
-        </form>
+        </motion.form>
       </div>
     </div>
   );

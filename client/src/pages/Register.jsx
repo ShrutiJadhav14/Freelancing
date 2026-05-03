@@ -1,16 +1,20 @@
 import { useState } from "react";
 import API from "../services/api";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function Register() {
   const nav = useNavigate();
+
+  const location = useLocation();
+  const roleFromURL = new URLSearchParams(location.search).get("role");
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    role: "developer",
+    role: roleFromURL || "developer",
   });
 
   const [errors, setErrors] = useState({});
@@ -19,14 +23,8 @@ export default function Register() {
     let err = {};
 
     if (!form.name) err.name = "Name required";
-
     if (!form.email) err.email = "Email required";
-    else if (!/\S+@\S+\.\S+/.test(form.email))
-      err.email = "Invalid email";
-
     if (!form.password) err.password = "Password required";
-    else if (!/^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(form.password))
-      err.password = "8-12 chars, letters + numbers";
 
     setErrors(err);
     return Object.keys(err).length === 0;
@@ -34,14 +32,16 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     try {
-      await API.post("/auth/register", form);
+      const res = await API.post("/auth/register", form);
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       toast.success("Account created 🎉");
-      nav("/login");
+      nav(res.data.user.role === "company" ? "/company" : "/developer");
 
     } catch (err) {
       toast.error(err.response?.data?.msg || "Error");
@@ -49,73 +49,85 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gradient-to-br from-purple-900 via-black to-gray-900">
 
       {/* LEFT */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-pink-500 to-orange-500 text-white flex-col justify-center items-center p-10">
-        <h1 className="text-4xl font-bold mb-4">DevConnect</h1>
-        <p className="text-lg opacity-80 text-center">
-          Join the fastest growing developer network.
+      <div className="hidden md:flex w-1/2 flex-col justify-center items-center text-white px-10">
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl font-bold mb-4"
+        >
+          DevConnect
+        </motion.h1>
+
+        <p className="text-gray-400 text-center max-w-sm">
+          Join the fastest growing developer network 🚀
         </p>
       </div>
 
       {/* RIGHT */}
-      <div className="flex w-full md:w-1/2 justify-center items-center bg-gray-100">
-        <form className="bg-white p-8 rounded-2xl shadow-2xl w-96" onSubmit={handleSubmit}>
-          
-          <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+      <div className="flex w-full md:w-1/2 justify-center items-center">
+        <motion.form
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          onSubmit={handleSubmit}
+          className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-xl w-96"
+        >
+          <h2 className="text-3xl font-bold text-white text-center mb-6">
+            Register
+          </h2>
 
-          {/* NAME */}
           <input
-            type="text"
             placeholder="Full Name"
-            className={`w-full p-3 border rounded-lg mb-1 ${errors.name && "border-red-500"}`}
+            className="w-full p-3 mb-2 bg-white/10 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500"
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
-          <p className="text-red-500 text-sm mb-3">{errors.name}</p>
+          <p className="text-red-400 text-sm">{errors.name}</p>
 
-          {/* EMAIL */}
           <input
-            type="email"
             placeholder="Email"
-            className={`w-full p-3 border rounded-lg mb-1 ${errors.email && "border-red-500"}`}
+            className="w-full p-3 mb-2 bg-white/10 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500"
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
-          <p className="text-red-500 text-sm mb-3">{errors.email}</p>
+          <p className="text-red-400 text-sm">{errors.email}</p>
 
-          {/* PASSWORD */}
           <input
             type="password"
             placeholder="Password"
-            className={`w-full p-3 border rounded-lg mb-1 ${errors.password && "border-red-500"}`}
+            className="w-full p-3 mb-2 bg-white/10 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500"
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-          <p className="text-red-500 text-sm mb-3">{errors.password}</p>
+          <p className="text-red-400 text-sm">{errors.password}</p>
 
-          {/* ROLE */}
-          <select
-            className="w-full p-3 border rounded-lg mb-4"
-            onChange={(e) => setForm({ ...form, role: e.target.value })}
+          {!roleFromURL && (
+            <select
+              className="w-full p-3 mb-4 bg-white/10 text-white border border-gray-600 rounded-lg"
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            >
+              <option value="developer">Developer</option>
+              <option value="company">Company</option>
+            </select>
+          )}
+
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            className="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-lg"
           >
-            <option value="developer">Developer</option>
-            <option value="company">Company</option>
-          </select>
-
-          <button className="w-full bg-pink-600 text-white py-3 rounded-lg hover:bg-pink-700 transition">
             Register
-          </button>
+          </motion.button>
 
-          <p className="text-sm mt-4 text-center">
+          <p className="text-gray-400 text-sm mt-4 text-center">
             Already have an account?
             <span
               onClick={() => nav("/login")}
-              className="text-pink-600 cursor-pointer ml-1"
+              className="text-pink-400 ml-1 cursor-pointer"
             >
               Login
             </span>
           </p>
-
-        </form>
+        </motion.form>
       </div>
     </div>
   );
