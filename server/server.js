@@ -5,7 +5,7 @@ const PORT = 5000;
 
 sequelize.sync() // 👈 THIS CREATES TABLES
   .then(() => {
-    console.log("Database connected & tables created");
+    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
