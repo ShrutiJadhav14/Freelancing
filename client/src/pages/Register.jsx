@@ -49,7 +49,16 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-purple-900 via-black to-gray-900">
+    <div className="min-h-screen flex bg-gradient-to-br from-purple-900 via-black to-gray-900 relative">
+
+      {/* BACK BUTTON */}
+      <motion.button
+        whileHover={{ x: -5 }}
+        onClick={() => nav("/")}
+        className="absolute top-6 left-6 text-white/60 hover:text-white flex items-center gap-2 transition-all z-50"
+      >
+        <span className="text-xl">←</span> Back to Home
+      </motion.button>
 
       {/* LEFT */}
       <div className="hidden md:flex w-1/2 flex-col justify-center items-center text-white px-10">
