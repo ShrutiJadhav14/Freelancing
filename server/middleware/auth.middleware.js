@@ -1,21 +1,10 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-<<<<<<< HEAD
-  const header = req.headers.authorization;
-
-  if (!header) return res.status(401).json({ msg: "No token" });
-
-  const token = header.startsWith("Bearer ")
-    ? header.split(" ")[1]
-    : header;
-
-=======
->>>>>>> 7842b7840910e24c8b1581f3ab803d9712c0fd1d
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ msg: "No token" });
     }
 
@@ -27,6 +16,7 @@ module.exports = (req, res, next) => {
 
     next();
   } catch (err) {
+    console.log("Auth error:", err.message);
     return res.status(401).json({ msg: "Invalid token" });
   }
 };

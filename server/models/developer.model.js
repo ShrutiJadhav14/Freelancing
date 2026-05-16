@@ -6,6 +6,7 @@ const Developer = sequelize.define('Developer', {
   bio: DataTypes.TEXT,
   skills: DataTypes.STRING,
   experience: DataTypes.INTEGER,
+  experienceType: DataTypes.STRING,
   github: DataTypes.STRING,
   linkedin: DataTypes.STRING,
   portfolio: DataTypes.STRING,

@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       companyName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull:false,
       },
       description: DataTypes.TEXT,
       website: DataTypes.STRING,

@@ -4,40 +4,47 @@ const API = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
+// ✅ Attach token to every request
+API.interceptors.request.use(
+  (req) => {
+    const token = localStorage.getItem("token");
 
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`; // ✅ IMPORTANT
-  }
+    if (token) {
+      req.headers.Authorization = `Bearer ${token}`;
+    }
 
-  return req;
-});
+    return req;
+  },
+  (error) => Promise.reject(error)
+);
 
-// ✅ Attach token
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  //console.log("interceptor sending token: ", token);
-  if (token) req.headers.Authorization = `Bearer ${token}`;
-  return req;
-});
-
-// ✅ Handle 401
+// ✅ Handle responses + global errors
 API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      localStorage.clear();
+  (response) => response,
+  (error) => {
+    // 🔐 Auto logout if token invalid/expired
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized - logging out");
+      localStorage.removeItem("token");
       window.location.href = "/login";
     }
-    return Promise.reject(err);
+
+    // 🔥 Log server errors (this helps a LOT)
+    if (error.response?.status === 500) {
+      console.error("Server error:", error.response.data);
+    }
+
+    return Promise.reject(error);
   }
 );
 
-// ✅ ADD THESE EXPORTS
-export const getCompanyProfile = () => API.get("/company/profile");
+// ✅ API calls
+export const getCompanyProfile = async () => {
+  return await API.get("/company/profile");
+};
 
-export const saveCompanyProfile = (data) =>
-  API.post("/company/profile", data);
+export const saveCompanyProfile = async (data) => {
+  return await API.post("/company/profile", data);
+};
 
 export default API;
