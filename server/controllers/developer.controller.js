@@ -3,7 +3,7 @@ const User = require('../models/user.model');
 
 exports.createOrUpdateProfile = async (req, res) => {
   try {
-    const { bio, skills, experience, github, linkedin, portfolio } = req.body;
+    const { bio, skills, experience, experienceType, github, linkedin, portfolio } = req.body;
 
     const photo = req.file ? req.file.path : null;
 
@@ -16,6 +16,7 @@ exports.createOrUpdateProfile = async (req, res) => {
         bio,
         skills,
         experience,
+        experienceType,
         github,
         linkedin,
         portfolio,
@@ -26,6 +27,7 @@ exports.createOrUpdateProfile = async (req, res) => {
         bio,
         skills,
         experience,
+        experienceType,
         github,
         linkedin,
         portfolio,
@@ -37,7 +39,7 @@ exports.createOrUpdateProfile = async (req, res) => {
     res.json(profile);
 
   } catch {
-     console.error(err); 
+    console.error(err);
     res.status(500).json({ msg: "Error saving profile" });
   }
 };
@@ -63,5 +65,57 @@ exports.getProfile = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error fetching profile" });
+  }
+};
+
+exports.getAllDevelopers = async (req, res) => {
+  try {
+    const { search, skill, page = 1 } = req.query;
+
+    const limit = 8;
+    const offset = (page - 1) * limit;
+
+    let whereCondition = {};
+
+    // 🔍 SKILL FILTER
+    if (skill) {
+      whereCondition.skills = {
+        [Op.like]: `%${skill}%`,
+      };
+    }
+
+    const developers = await Developer.findAndCountAll({
+      where: whereCondition,
+
+      include: [
+        {
+          model: User,
+          attributes: ["name", "email"],
+          where: search
+            ? {
+              name: {
+                [Op.like]: `%${search}%`,
+              },
+            }
+            : {},
+        },
+      ],
+
+      limit,
+      offset,
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json({
+      total: developers.count,
+      currentPage: Number(page),
+      totalPages: Math.ceil(developers.count / limit),
+      developers: developers.rows,
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Error fetching developers" });
   }
 };

@@ -10,8 +10,8 @@ router.post(
   '/profile',
   auth,
   role('developer'),
-  upload.single('photo'), 
+  upload.single('photo'),
   ctrl.createOrUpdateProfile
 );
-
+router.get("/all", ctrl.getAllDevelopers);
 module.exports = router;
